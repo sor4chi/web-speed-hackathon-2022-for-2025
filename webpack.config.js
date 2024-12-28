@@ -19,9 +19,9 @@ const ANALYZE = process.env.ANALYZE === "true";
 /** @type {Array<import('webpack').Configuration>} */
 module.exports = [
   {
-    devtool: "inline-source-map",
+    devtool: false,
     entry: path.join(SRC_ROOT, "client/index.jsx"),
-    mode: "development",
+    mode: "production",
     module: {
       rules: [
         {
@@ -60,7 +60,7 @@ module.exports = [
       new CopyPlugin({
         patterns: [{ from: PUBLIC_ROOT, to: DIST_PUBLIC }],
       }),
-      ANALYZE && new BundleAnalyzerPlugin(),
+      ...(ANALYZE ? [new BundleAnalyzerPlugin()] : []),
     ],
     resolve: {
       extensions: [".js", ".jsx"],
@@ -68,7 +68,7 @@ module.exports = [
     target: "web",
   },
   {
-    devtool: "inline-source-map",
+    devtool: false,
     entry: path.join(SRC_ROOT, "server/index.js"),
     externals: [nodeExternals()],
     mode: "development",

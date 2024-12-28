@@ -3,6 +3,8 @@ const path = require("path");
 
 const CopyPlugin = require("copy-webpack-plugin");
 const nodeExternals = require("webpack-node-externals");
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 function abs(...args) {
   return path.join(__dirname, ...args);
@@ -12,6 +14,7 @@ const SRC_ROOT = abs("./src");
 const PUBLIC_ROOT = abs("./public");
 const DIST_ROOT = abs("./dist");
 const DIST_PUBLIC = abs("./dist/public");
+const ANALYZE = process.env.ANALYZE === "true";
 
 /** @type {Array<import('webpack').Configuration>} */
 module.exports = [
@@ -57,6 +60,7 @@ module.exports = [
       new CopyPlugin({
         patterns: [{ from: PUBLIC_ROOT, to: DIST_PUBLIC }],
       }),
+      ANALYZE && new BundleAnalyzerPlugin(),
     ],
     resolve: {
       extensions: [".js", ".jsx"],

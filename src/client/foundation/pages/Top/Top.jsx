@@ -9,7 +9,7 @@ import { Stack } from "../../components/layouts/Stack";
 import { Heading } from "../../components/typographies/Heading";
 import { useAuthorizedFetch } from "../../hooks/useAuthorizedFetch";
 import { useFetch } from "../../hooks/useFetch";
-import { Color, Radius, Space } from "../../styles/variables";
+import { Color, FontSize, Radius, Space } from "../../styles/variables";
 import { isSameDay } from "../../utils/DateUtils";
 import { authorizedJsonFetcher, jsonFetcher } from "../../utils/HttpUtils";
 
@@ -152,14 +152,18 @@ export const Top = () => {
 
       <Spacer mt={Space * 2} />
       <section>
-        <Heading as="h1">本日のレース</Heading>
-        {todayRacesToShow.length > 0 && (
-          <RecentRaceList>
-            {todayRacesToShow.map((race) => (
-              <RecentRaceList.Item key={race.id} race={race} />
-            ))}
-          </RecentRaceList>
-        )}
+        <Heading as="h1" forceFontSize={FontSize.X_LARGE}>
+          本日のレース
+        </Heading>
+        <div style={{ minHeight: 162 * 5 }}>
+          {todayRacesToShow.length > 0 && (
+            <RecentRaceList>
+              {todayRacesToShow.map((race) => (
+                <RecentRaceList.Item key={race.id} race={race} />
+              ))}
+            </RecentRaceList>
+          )}
+        </div>
       </section>
 
       <ChargeDialog ref={chargeDialogRef} onComplete={handleCompleteCharge} />

@@ -30,16 +30,13 @@ export const RaceCard = () => {
   const { raceId } = useParams();
   const { data } = useFetch(`/api/races/${raceId}/no-odds`, jsonFetcher);
 
-  if (data == null) {
-    return <Container>Loading...</Container>;
-  }
-
   return (
     <Container>
       <Spacer mt={Space * 2} />
-      <Heading as="h1">{data.name}</Heading>
+      <Heading as="h1">{data?.name}</Heading>
       <p>
-        開始 {formatTime(data.startAt)} 締切 {formatTime(data.closeAt)}
+        開始 {data ? formatTime(data.startAt) : "..."} 締切{" "}
+        {data ? formatTime(data.closeAt) : "..."}
       </p>
 
       <Spacer mt={Space * 2} />
@@ -49,7 +46,7 @@ export const RaceCard = () => {
         <Spacer mt={Space * 2} />
         <TrimmedImage
           height={225}
-          src={data.image.replace(".jpg", "-400x225.webp")}
+          src={data?.image.replace(".jpg", "-400x225.webp")}
           width={400}
         />
       </Section>
@@ -66,19 +63,23 @@ export const RaceCard = () => {
         </TabNav>
 
         <Spacer mt={Space * 2} />
-        <PlayerPictureList>
-          {data.entries.map((entry) => (
-            <PlayerPictureList.Item
-              key={entry.id}
-              image={entry.player.image}
-              name={entry.player.name}
-              number={entry.number}
-            />
-          ))}
-        </PlayerPictureList>
+        <div style={{ minHeight: "132px" }}>
+          <PlayerPictureList>
+            {(data?.entries || []).map((entry) => (
+              <PlayerPictureList.Item
+                key={entry.id}
+                image={entry.player.image}
+                name={entry.player.name}
+                number={entry.number}
+              />
+            ))}
+          </PlayerPictureList>
+        </div>
 
         <Spacer mt={Space * 4} />
-        <EntryTable entries={data.entries} />
+        <div style={{ minHeight: "200px" }}>
+          <EntryTable entries={data?.entries || []} />
+        </div>
       </Section>
     </Container>
   );

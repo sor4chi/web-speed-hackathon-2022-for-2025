@@ -42,7 +42,10 @@ const Callout = styled.aside`
 /** @type {React.VFC} */
 export const Odds = () => {
   const { raceId } = useParams();
-  const { data } = useFetch(`/api/races/${raceId}/no-odds`, jsonFetcher);
+  const { data, loading } = useFetch(
+    `/api/races/${raceId}/no-odds`,
+    jsonFetcher,
+  );
   const { data: odds } = useFetch(`/api/races/${raceId}/odds`, jsonFetcher);
   const [oddsKeyToBuy, setOddsKeyToBuy] = useState(null);
   const modalRef = useRef(null);
@@ -58,18 +61,15 @@ export const Odds = () => {
     [],
   );
 
-  if (data == null) {
-    return <Container>Loading...</Container>;
-  }
-
-  const isRaceClosed = new Date(data.closeAt) < new Date();
+  const isRaceClosed = new Date(data?.closeAt) < new Date();
 
   return (
     <Container>
       <Spacer mt={Space * 2} />
-      <Heading as="h1">{data.name}</Heading>
+      <Heading as="h1">{data?.name || ""}</Heading>
       <p>
-        開始 {formatTime(data.startAt)} 締切 {formatTime(data.closeAt)}
+        開始 {data ? formatTime(data.startAt) : "..."} 締切{" "}
+        {data ? formatTime(data.closeAt) : "..."}
       </p>
 
       <Spacer mt={Space * 2} />
@@ -79,7 +79,7 @@ export const Odds = () => {
         <Spacer mt={Space * 2} />
         <TrimmedImage
           height={225}
-          src={data.image.replace(".jpg", "-400x225.webp")}
+          src={data?.image.replace(".jpg", "-400x225.webp")}
           width={400}
         />
       </Section>
@@ -97,33 +97,41 @@ export const Odds = () => {
 
         <Spacer mt={Space * 4} />
 
-        <Callout $closed={isRaceClosed}>
-          <FaInfoCircle />
-          {isRaceClosed
-            ? "このレースの投票は締め切られています"
-            : "オッズをクリックすると拳券が購入できます"}
-        </Callout>
+        <div style={{ minHeight: "40px" }}>
+          {!loading && (
+            <Callout $closed={isRaceClosed}>
+              <FaInfoCircle />
+              {isRaceClosed
+                ? "このレースの投票は締め切られています"
+                : "オッズをクリックすると拳券が購入できます"}
+            </Callout>
+          )}
+        </div>
 
         <Spacer mt={Space * 4} />
         <Heading as="h2">オッズ表</Heading>
 
         <Spacer mt={Space * 2} />
-        <OddsTable
-          entries={data.entries}
-          isRaceClosed={isRaceClosed}
-          odds={odds ?? []}
-          onClickOdds={handleClickOdds}
-        />
+        <div style={{ minHeight: "200px" }}>
+          <OddsTable
+            entries={data?.entries || []}
+            isRaceClosed={isRaceClosed}
+            odds={odds ?? []}
+            onClickOdds={handleClickOdds}
+          />
+        </div>
 
         <Spacer mt={Space * 4} />
         <Heading as="h2">人気順</Heading>
 
         <Spacer mt={Space * 2} />
-        <OddsRankingList
-          isRaceClosed={isRaceClosed}
-          odds={odds ?? []}
-          onClickOdds={handleClickOdds}
-        />
+        <div style={{ minHeight: 64 * 20 }}>
+          <OddsRankingList
+            isRaceClosed={isRaceClosed}
+            odds={odds ?? []}
+            onClickOdds={handleClickOdds}
+          />
+        </div>
       </Section>
 
       <TicketVendingModal ref={modalRef} odds={oddsKeyToBuy} raceId={raceId} />

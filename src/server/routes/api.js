@@ -1,11 +1,14 @@
+import sqlite3 from "better-sqlite3";
 import moment from "moment-timezone";
 import { Between, LessThanOrEqual, MoreThanOrEqual } from "typeorm";
 import zenginCode from "zengin-code";
 
-import { assets } from "../../client/foundation/utils/UrlUtils.js";
 import { BettingTicket, Race, User } from "../../model/index.js";
+import { DATABASE_PATH } from "../paths.js";
 import { createConnection } from "../typeorm/connection.js";
 import { initialize } from "../typeorm/initialize.js";
+
+const db = new sqlite3(DATABASE_PATH);
 
 /**
  * @type {import('fastify').FastifyPluginCallback}
@@ -92,6 +95,57 @@ export const apiRoute = async (fastify) => {
     }
 
     res.send(race);
+  });
+
+  fastify.get("/races/:raceId/no-odds", async (req, res) => {
+    const repo = (await createConnection()).getRepository(Race);
+
+    const race = await repo.findOne(req.params.raceId, {
+      relations: ["entries", "entries.player"],
+    });
+
+    if (race === undefined) {
+      throw fastify.httpErrors.notFound();
+    }
+
+    res.send(race);
+  });
+
+  fastify.get("/races/:raceId/high-odds", async (req, res) => {
+    const race = db
+      .prepare(
+        `SELECT * FROM odds_item WHERE raceId = ? ORDER BY odds LIMIT 50`,
+      )
+      .all(req.params.raceId);
+
+    if (race === undefined) {
+      throw fastify.httpErrors.notFound();
+    }
+
+    console.log(race);
+    const parsedRace = race.map((item) => {
+      item.key = JSON.parse(item.key);
+      return item;
+    });
+
+    res.send(parsedRace);
+  });
+
+  fastify.get("/races/:raceId/odds", async (req, res) => {
+    const race = db
+      .prepare(`SELECT * FROM odds_item WHERE raceId = ? ORDER BY odds`)
+      .all(req.params.raceId);
+
+    if (race === undefined) {
+      throw fastify.httpErrors.notFound();
+    }
+
+    const parsedRace = race.map((item) => {
+      item.key = JSON.parse(item.key);
+      return item;
+    });
+
+    res.send(parsedRace);
   });
 
   fastify.get("/races/:raceId/betting-tickets", async (req, res) => {

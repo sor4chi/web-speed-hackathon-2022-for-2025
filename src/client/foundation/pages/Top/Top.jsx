@@ -23,6 +23,19 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+/**
+ * @param {string} dateYMD
+ * @returns {[Date, Date]}
+ */
+const getSpan = (dateYMD) => {
+  const date = new Date(dateYMD);
+  const since = new Date(date);
+  since.setHours(0, 0, 0, 0);
+  const until = new Date(date);
+  until.setHours(23, 59, 59, 999);
+  return [since, until];
+};
+
 /** @type {React.VFC} */
 export const Top = () => {
   const { date = formatDate(new Date()) } = useParams();
@@ -45,7 +58,13 @@ export const Top = () => {
     authorizedJsonFetcher,
   );
 
-  const { data: raceData } = useFetch("/api/races", jsonFetcher);
+  const query = new URLSearchParams();
+  query.set("since", Math.floor(getSpan(date)[0].getTime() / 1000));
+  query.set("until", Math.floor(getSpan(date)[1].getTime() / 1000));
+  const { data: raceData } = useFetch(
+    `/api/races?${query.toString()}`,
+    jsonFetcher,
+  );
 
   const handleClickChargeButton = useCallback(() => {
     if (chargeDialogRef.current === null) {

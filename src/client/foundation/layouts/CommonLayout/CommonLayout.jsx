@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Outlet } from "react-router-dom";
 
 import { Footer } from "../../components/navs/Footer";
@@ -6,14 +6,16 @@ import { Header } from "../../components/navs/Header/Header";
 
 export const CommonLayout = () => {
   return (
-    <div>
-      <Header />
+    <Suspense fallback={null}>
+      <div>
+        <Header />
 
-      <main>
-        <Outlet />
-      </main>
+        <main>
+          <Outlet />
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </Suspense>
   );
 };

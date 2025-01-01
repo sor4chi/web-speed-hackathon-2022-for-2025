@@ -5,7 +5,6 @@ import { LinkButton } from "../../../../components/buttons/LinkButton";
 import { Spacer } from "../../../../components/layouts/Spacer";
 import { Stack } from "../../../../components/layouts/Stack";
 import { TrimmedImage } from "../../../../components/media/TrimmedImage";
-import { easeOutCubic, useAnimation } from "../../../../hooks/useAnimation";
 import { Color, FontSize, Radius, Space } from "../../../../styles/variables";
 import { formatCloseAt } from "../../../../utils/DateUtils";
 
@@ -20,8 +19,26 @@ export const RecentRaceList = ({ children }) => {
 const ItemWrapper = styled.li`
   background: ${Color.mono[0]};
   border-radius: ${Radius.MEDIUM};
-  opacity: ${({ $opacity }) => $opacity};
+  opacity: 0;
   padding: ${Space * 3}px;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  animation: fadeIn 0.5s cubic-bezier(0.2, 0.6, 0.35, 1);
+  animation-delay: ${({ delay }) => `${delay}s`};
+  animation-fill-mode: forwards;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 1;
+  }
 `;
 
 const RaceButton = styled(LinkButton)`
@@ -43,10 +60,11 @@ const RaceTitle = styled.h2`
 /**
  * @typedef ItemProps
  * @property {Model.Race} race
+ * @property {number} idx
  */
 
 /** @type {React.VFC<ItemProps>} */
-const Item = ({ race }) => {
+const Item = ({ race, idx }) => {
   const [closeAtText, setCloseAtText] = useState(formatCloseAt(race.closeAt));
 
   // 締切はリアルタイムで表示したい
@@ -60,29 +78,8 @@ const Item = ({ race }) => {
     };
   }, [race.closeAt]);
 
-  const {
-    abortAnimation,
-    resetAnimation,
-    startAnimation,
-    value: opacity,
-  } = useAnimation({
-    duration: 500,
-    end: 1,
-    start: 0,
-    timingFunction: easeOutCubic,
-  });
-
-  useEffect(() => {
-    resetAnimation();
-    startAnimation();
-
-    return () => {
-      abortAnimation();
-    };
-  }, [race.id, startAnimation, abortAnimation, resetAnimation]);
-
   return (
-    <ItemWrapper $opacity={opacity}>
+    <ItemWrapper delay={idx * 0.1}>
       <Stack horizontal alignItems="center" justifyContent="space-between">
         <Stack gap={Space * 1}>
           <RaceTitle>{race.name}</RaceTitle>
